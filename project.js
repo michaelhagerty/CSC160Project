@@ -1,5 +1,5 @@
 //data for 20 teams
-var data = [8,14,18,7,19,20,16,5,13,17,13,20,16,16,14,8,7,19,18,15]
+var data = [47,51,36,67,67,63,76,76,61,53,38,54,66,66,81,101,101,98,155,73]
 
 
 //margins
@@ -31,7 +31,7 @@ var svg = d3.select("#graph")
 
 //Y Scale
 var y = d3.scaleLinear()
-  .domain([0,24])
+  .domain([0,175])
   .range([height, 0]);
 svg.call(d3.axisLeft(y))
 
@@ -69,6 +69,9 @@ svg
   .attr("y1", function(d){ return(y(d))} )
   .attr("y2", function(d){ return(y(d))} )
   .attr("stroke", "black")
+
+
+
 
 
 
