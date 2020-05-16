@@ -1,78 +1,195 @@
-//data for 20 teams
-var data = [47,51,36,67,67,63,76,76,61,53,38,54,66,66,81,101,101,98,155,73]
+var dur = 1000
 
 
-//margins
-var margin = {top: 10, right: 30, bottom: 30, left: 40},
+var drawScatter = function(teams,target,
+              xScale,yScale,xProp,yProp)
+{
+
+    setBanner(xProp.toUpperCase() +" vs "+ yProp.toUpperCase());
+    
+	//join
+	var circles = d3.select(target)
+		.select(".graph")
+		.selectAll("circle")
+		.data(teams, function(team,index)
+			 {
+			return team.picture
+		})
+	//enter
+	circles.enter()
+		.append("circle")
 	
-//graph dimensions
-  width = 400 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+	//exit
+	circles.exit()
+		.remove()
+	
+	//update
+d3.select(target)
+	.select(".graph")
+    .selectAll("circle")
+    .transition()
+	.duration(dur)
+    .attr("cx",function(team)
+    {
+        return xScale(team[xProp]);    
+    })
+    .attr("cy",function(team)
+    {
+        return yScale(team[yProp]);    
+    })
+    .attr("r",4);
+	
+}
 
-//Box Chart stats
-var data_sorted = data.sort(d3.ascending)
-var q1 = d3.quantile(data_sorted, .25)
-var median = d3.quantile(data_sorted, .5)
-var q3 = d3.quantile(data_sorted, .75)
-var interQuantileRange = q3 - q1
-var min = q1 - 1.5 * interQuantileRange
-var max = q1 + 1.5 * interQuantileRange
-
-
-//append SVG
-var svg = d3.select("#graph")
-.append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-.append("g")
-  .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-
-//Y Scale
-var y = d3.scaleLinear()
-  .domain([0,175])
-  .range([height, 0]);
-svg.call(d3.axisLeft(y))
-
-//where to put on graph
-var center = 200
-var width = 100
-
-//vertical line
-svg
-.append("line")
-  .attr("x1", center)
-  .attr("x2", center)
-  .attr("y1", y(min) )
-  .attr("y2", y(max) )
-  .attr("stroke", "black")
-
-// box
-svg
-.append("rect")
-  .attr("x", center - width/2)
-  .attr("y", y(q3) )
-  .attr("height", (y(q1)-y(q3)) )
-  .attr("width", width )
-  .attr("stroke", "black")
-  .style("fill", "red")
-
-//3 horizontal lines
-svg
-.selectAll("toto")
-.data([min, median, max])
-.enter()
-.append("line")
-  .attr("x1", center-width/2)
-  .attr("x2", center+width/2)
-  .attr("y1", function(d){ return(y(d))} )
-  .attr("y2", function(d){ return(y(d))} )
-  .attr("stroke", "black")
+var clearScatter = function(target)
+{
+    d3.select(target)
+        .select(".graph")
+        .selectAll("circle")
+        .remove();
+}
 
 
+var createAxes = function(screen,margins,graph,
+                           target,xScale,yScale)
+{
+    var xAxis = d3.axisBottom(xScale);
+    var yAxis = d3.axisLeft(yScale);
+    
+    var axes = d3.select(target)
+        .append("g")
+    axes.append("g")
+		.classed("xaxis",true)
+        .attr("transform","translate("+margins.left+","
+             +(margins.top+graph.height)+")")
+        .call(xAxis)
+    axes.append("g")
+		.classed("yaxis",true)
+        .attr("transform","translate("+margins.left+","
+             +(margins.top)+")")
+        .call(yAxis)
+}
 
 
+var initGraph = function(target,teams)
+{
+    //the size of the screen
+    var screen = {width:500, height:400};
+    
+    //how much space will be on each side of the graph
+    var margins = {top:15,bottom:40,left:70,right:15};
+    
+    //generated how much space the graph will take up
+    var graph = 
+    {
+        width:screen.width-margins.left-margins.right,
+        height:screen.height-margins.top-margins.bottom,
+    }
+    
+
+    //set the screen size
+    d3.select(target)
+        .attr("width",screen.width)
+        .attr("height",screen.height)
+    
+    //create a group for the graph
+    var g = d3.select(target)
+        .append("g")
+        .classed("graph",true)
+        .attr("transform","translate("+margins.left+","+
+             margins.top+")");
+        
+    //create scales for all of the dimensions
+    
+    
+    var xScale = d3.scaleLinear()
+        .domain([0,100])
+        .range([0,graph.width])
+           
+    var yScale = d3.scaleLinear()
+        .domain([0,100])
+        .range([graph.height,0])
+  
+    
+    
+    createAxes(screen,margins,graph,target,xScale,yScale);
+    
+    initButtons(teams,target,xScale,yScale);
+    
+    setBanner("Click buttons to graphs");
+    
+    
+
+}
+
+var initButtons = function(teams,target,xScale,yScale)
+{
+    
+    d3.select("#qwe")
+    .on("click",function()
+    {
+        clearScatter(target);
+        drawScatter(teams,target,
+              xScale,yScale,"goals_scored_home","goals_scored_away");
+    })
+    
+    d3.select("#rty")
+    .on("click",function()
+    {
+        clearScatter(target);
+        drawScatter(teams,target,
+              xScale,yScale,"minutes_per_goal_scored","first_team_to_score_count");
+    })
+    
+    d3.select("#uio")
+    .on("click",function()
+    {
+        clearScatter(target);
+        drawScatter(teams,target,
+              xScale,yScale,"goals_scored","goals_conceded");
+    })
+    
+    d3.select("#pas")
+    .on("click",function()
+    {
+        clearScatter(target);
+        drawScatter(teams,target,
+              xScale,yScale,"minutes_per_goal_scored_home","minutes_per_goal_scored_away");
+    })
+	
+	d3.select("#dfg")
+    .on("click",function()
+    {
+        clearScatter(target);
+        drawScatter(teams,target,
+              xScale,yScale,"average_possession_home","average_possession_away");
+    })
+    
+    
+    
+}
+
+var setBanner = function(msg)
+{
+    d3.select("#banner")
+        .text(msg);
+    
+}
+
+
+
+var teamPromise = d3.csv("data.csv");
+
+teamPromise.then(function(teams)
+{
+    console.log("team data", teams);
+   initGraph("#scatter",teams);
+   
+},
+function(err)
+{
+   console.log("Error Loading data:",err);
+});
 
 
 
