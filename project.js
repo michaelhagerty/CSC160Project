@@ -15,6 +15,7 @@ var drawScatter = function(teams,target,
 			 {
 			return team.picture
 		})
+		.classed("circle",true)
 	//enter
 	circles.enter()
 		.append("circle")
@@ -37,9 +38,10 @@ d3.select(target)
     {
         return yScale(team[yProp]);    
     })
-    .attr("r",4);
-	
+    .attr("r",4)
+		
 }
+
 
 var clearScatter = function(target)
 {
@@ -103,11 +105,11 @@ var initGraph = function(target,teams)
     
     
     var xScale = d3.scaleLinear()
-        .domain([0,100])
+        .domain([0,170])
         .range([0,graph.width])
            
     var yScale = d3.scaleLinear()
-        .domain([0,100])
+        .domain([0,160])
         .range([graph.height,0])
   
     
@@ -190,7 +192,6 @@ function(err)
 {
    console.log("Error Loading data:",err);
 });
-
 
 
 
